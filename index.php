@@ -28,7 +28,7 @@ class siteDownloader
         $path = $this->ResultPath;
         for ($i = 0; $i < $count; ++$i) {
             $path .= '/' . $dirs[$i];
-            if (!is_dir($path) && !mkdir($path, $mode)) {
+            if (!is_dir($path) && !@mkdir($path, $mode)) {
                 return false;
             }
         }
@@ -121,25 +121,33 @@ class siteDownloader
     {
         foreach ($this->filesStyleList as $file)
         {
-            $replacedUrls = array();
             $dirLevels = substr_count($file, '/');
-            $fileContent = file_get_contents( $this->ResultPath.'/'.$file);
-            preg_match_all('/url\(["\']*([^\)|"|\']+)/is', $fileContent, $urls);
-            if ( !empty($urls[1]) )
-            {
-                foreach ($urls[1] as $url)
-                {
-                    $newSrc = $this->downloadFile($url, true);
-                    if ( empty($replacedUrls[$url]) )
-                    {
-                        $fileContent = str_ireplace($url, ( $dirLevels ? str_repeat('../', $dirLevels) : '') . $newSrc, $fileContent);
-                        $replacedUrls[ $url ] = ( $dirLevels ? str_repeat('../', $dirLevels) : '') . $newSrc;
-                    }
-                }
-                file_put_contents( $this->ResultPath.'/'. $file, $fileContent);
-            }
+			$this->downloadDataFromCss($this->ResultPath.'/'.$file, $dirLevels);
         }
     }
+
+	function downloadDataFromCss($filepath, $dirLevels = false)
+	{
+		$fileContent = file_get_contents( $filepath );
+
+		$replacedUrls = array();
+
+		preg_match_all('/url\(["\']*([^\)|"|\']+)/is', $fileContent, $urls);
+		if ( !empty($urls[1]) )
+		{
+			foreach ($urls[1] as $url)
+			{
+				if ( !strpos($url, ';base64,') ) {
+					$newSrc = $this->downloadFile($url, true);
+					if ( empty($replacedUrls[$url]) ) {
+						$fileContent = str_ireplace($url, ($dirLevels ? str_repeat('../', $dirLevels) : '') . $newSrc, $fileContent);
+						$replacedUrls[$url] = ($dirLevels ? str_repeat('../', $dirLevels) : '') . $newSrc;
+					}
+				}
+			}
+			file_put_contents( $filepath, $fileContent);
+		}
+	}
 
     function downloadFile($url, $isBinFile = false)
     {
@@ -197,7 +205,6 @@ class siteDownloader
 
 set_time_limit(0);
 
-//$sd = new siteDownloader('http://dev.paulradzkov.com/elearningsoft/products');
-$sd = new siteDownloader('http://auto314.ru/catalog?id=238');
-$sd->download('page2.html');
+$sd = new siteDownloader('http://www.velostrana.ru/');
+$sd->downloadDataFromCss('plagin.css');
 ?>

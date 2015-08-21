@@ -190,7 +190,7 @@ class WebPages
 				$fname.='?'.$uh['query'];
 			
 		$x='';
-		$fp = @fsockopen($fhost, 80, &$errno, &$errstr, 1);
+		$fp = @fsockopen($fhost, 80, $errno, $errstr, 1);
 		
 		if (empty($fp)) return false;
 		
