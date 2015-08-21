@@ -8,6 +8,7 @@ class siteDownloader
     var $ResultPath;
     var $target_url = '';
     var $page = '';
+    var $cssUrl = '';
 
     var $filesStyleList = array();
     var $filesScriptList = array();
@@ -164,6 +165,10 @@ class siteDownloader
 
             $this->forceDir(dirname($filePath));
         }
+        
+        
+		if ( !empty($this->cssUrl) )
+			$tHost = $this->cssUrl;
 
         if ( empty($r['host']) )
         {
@@ -205,6 +210,7 @@ class siteDownloader
 
 set_time_limit(0);
 
-$sd = new siteDownloader('http://www.velostrana.ru/');
-$sd->downloadDataFromCss('plagin.css');
+$sd = new siteDownloader('http://sanit.by/');
+$sd->cssUrl = 'http://sanit.by/catalog/view/theme/sanit.by/stylesheet';
+$sd->downloadDataFromCss('styles.css');
 ?>
